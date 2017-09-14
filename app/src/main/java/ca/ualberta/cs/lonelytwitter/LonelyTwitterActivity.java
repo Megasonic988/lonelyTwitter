@@ -41,7 +41,6 @@ public class LonelyTwitterActivity extends Activity {
 				String text = bodyText.getText().toString();
 				saveInFile(text, new Date(System.currentTimeMillis()));
 				finish();
-
 			}
 		});
 	}
