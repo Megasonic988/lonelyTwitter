@@ -1,3 +1,13 @@
+/**
+ * LonelyTwitterActivity class
+ *
+ * Copyright 2017 Kevin Wang
+ *
+ * @author weixiang
+ * @version 1.0
+ * @created 2017-09-27
+ */
+
 package ca.ualberta.cs.lonelytwitter;
 
 import java.io.BufferedReader;
@@ -25,6 +35,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 
+/**
+ * LonelyTwitterActivity is the main activity for the Lonely
+ * Twitter app. It displays an interface with a list of Tweets
+ * and a text field for adding new Tweets. On app start, the Tweets
+ * are loaded from a file in JSON format. Actions to the
+ * tweets are saved in the file.
+ */
 public class LonelyTwitterActivity extends Activity {
 
 	private static final String FILENAME = "file.sav";
@@ -34,7 +51,13 @@ public class LonelyTwitterActivity extends Activity {
 	private ArrayList<Tweet> tweets = new ArrayList<Tweet>();
 	private ArrayAdapter<Tweet> adapter;
 
-	/** Called when the activity is first created. */
+	/**
+	 * onCreate sets up links between UI elements and controller
+	 * actions. Causes save button to trigger adding the
+	 * new Tweet to the tweets list and saves the Tweet
+	 * into a file.
+	 * @param savedInstanceState
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
@@ -66,6 +89,10 @@ public class LonelyTwitterActivity extends Activity {
         });
 	}
 
+	/**
+	 * onStart loads the Tweets from the saved file. It also
+	 * sets up the adapter for the tweets list.
+	 */
 	@Override
 	protected void onStart() {
 		// TODO Auto-generated method stub
@@ -78,6 +105,10 @@ public class LonelyTwitterActivity extends Activity {
 		oldTweetsList.setAdapter(adapter);
 	}
 
+	/**
+	 * Load the Tweets from a file using Gson library.
+	 * If no file is found, create a new file.
+	 */
 	private void loadFromFile() {
 		try {
 			FileInputStream fis = openFileInput(FILENAME);
@@ -94,7 +125,11 @@ public class LonelyTwitterActivity extends Activity {
 			throw new RuntimeException();
 		}
 	}
-	
+
+	/**
+	 * Save the Tweets in the tweets list to a file
+	 * in JSON format, using the Gson library.
+	 */
 	private void saveInFile() {
 		try {
             FileOutputStream fos = openFileOutput(FILENAME, Context.MODE_APPEND);
@@ -108,6 +143,10 @@ public class LonelyTwitterActivity extends Activity {
         }
 	}
 
+	/**
+	 * Clear the tweets list and delete the file
+	 * where tweets are saved.
+	 */
 	private void clearTweets() {
         tweets.clear();
         adapter.notifyDataSetChanged();
