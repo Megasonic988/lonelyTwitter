@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import android.app.Activity;
 import android.content.Context;
@@ -25,15 +26,13 @@ import android.widget.ListView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-public class LonelyTwitterActivity extends Activity {
+public class LonelyTwitterActivity extends Activity implements AsyncResponse {
 
 	private static final String FILENAME = "file.sav";
 	private EditText bodyText;
 	private ListView oldTweetsList;
-	private ArrayList<Tweet> tweetList = new ArrayList<Tweet>();
-	private ArrayAdapter<Tweet> adapter;
-
-
+	private ArrayList<NormalTweet> tweetList = new ArrayList<NormalTweet>();
+	private ArrayAdapter<NormalTweet> adapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -50,32 +49,49 @@ public class LonelyTwitterActivity extends Activity {
 			public void onClick(View v) {
 				setResult(RESULT_OK);
 				String text = bodyText.getText().toString();
-				Tweet newTweet = new NormalTweet(text);
+				NormalTweet newTweet = new NormalTweet(text);
 				tweetList.add(newTweet);
 				adapter.notifyDataSetChanged();
-				saveInFile(); // TODO replace this with elastic search
+
+				ElasticsearchTweetController.AddTweetsTask addTweetsTask = new ElasticsearchTweetController.AddTweetsTask();
+				addTweetsTask.execute(newTweet);
 			}
 		});
 
+		final LonelyTwitterActivity self = this;
 		clearButton.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
 				setResult(RESULT_OK);
 				tweetList.clear();
-				deleteFile(FILENAME);  // TODO deprecate this button
 				adapter.notifyDataSetChanged();
+				String text = bodyText.getText().toString();
+
+				ElasticsearchTweetController.GetTweetsTask getTweetsTask = new ElasticsearchTweetController.GetTweetsTask();
+				getTweetsTask.delegate = self;
+				getTweetsTask.execute(text);
 			}
 		});
 
 
 	}
 
+	public void processFetchedTweets(ArrayList<NormalTweet> tweets) {
+		tweetList.clear();
+		tweetList.addAll(tweets);
+		adapter.notifyDataSetChanged();
+	}
+
 	@Override
 	protected void onStart() {
 		// TODO Auto-generated method stub
 		super.onStart();
-		loadFromFile(); // TODO replace this with elastic search
-		adapter = new ArrayAdapter<Tweet>(this,
+
+		ElasticsearchTweetController.GetTweetsTask getTweetsTask = new ElasticsearchTweetController.GetTweetsTask();
+		getTweetsTask.delegate = this;
+		getTweetsTask.execute("");
+
+		adapter = new ArrayAdapter<NormalTweet>(this,
 				R.layout.list_item, tweetList);
 		oldTweetsList.setAdapter(adapter);
 	}
@@ -91,10 +107,7 @@ public class LonelyTwitterActivity extends Activity {
 			tweetList = gson.fromJson(in, listType);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			tweetList = new ArrayList<Tweet>();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			throw new RuntimeException();
+			tweetList = new ArrayList<NormalTweet>();
 		}
 	}
 
