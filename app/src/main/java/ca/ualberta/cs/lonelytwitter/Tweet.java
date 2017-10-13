@@ -56,6 +56,11 @@ public abstract class Tweet extends Object implements Tweetable {
         return text;
     }
 
+    public String getMessage() {
+        return getText();
+    }
+
+
     /**
      * Set the text string of the Tweet.
      * @param text
