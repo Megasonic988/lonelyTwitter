@@ -35,9 +35,6 @@ public class TweetList {
                 return t1.getDate().compareTo(t2.getDate());
             }
         });
-        Log.i("TWEET1", tweets.get(0).getDate().toString());
-        Log.i("TWEET2", tweets.get(1).getDate().toString());
-        Log.i("TWEET3", tweets.get(2).getDate().toString());
         return tweets;
     }
 
